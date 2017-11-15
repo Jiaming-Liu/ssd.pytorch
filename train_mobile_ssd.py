@@ -10,7 +10,7 @@ import torch.utils.data as data
 from data import mobilessd, AnnotationTransform, VOCDetection, detection_collate, VOCroot, VOC_CLASSES
 from utils.augmentations import SSDAugmentation
 from layers.modules import MultiBoxLoss
-from mobile_ssd import build_ssd
+from mobile_ssd import build_ssd, MobileSSD
 import numpy as np
 import time
 
@@ -27,7 +27,7 @@ parser.add_argument('--num_workers', default=2, type=int, help='Number of worker
 parser.add_argument('--iterations', default=120000, type=int, help='Number of training iterations')
 parser.add_argument('--start_iter', default=0, type=int, help='Begin counting iterations starting from this value (should be used with resume)')
 parser.add_argument('--cuda', default=True, type=str2bool, help='Use cuda to train model')
-parser.add_argument('--lr', '--learning-rate', default=1e-3, type=float, help='initial learning rate')
+parser.add_argument('--lr', '--learning-rate', default=1e-2, type=float, help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
 parser.add_argument('--weight_decay', default=5e-4, type=float, help='Weight decay for SGD')
 parser.add_argument('--gamma', default=0.1, type=float, help='Gamma update for SGD')
@@ -107,7 +107,43 @@ if not args.resume:
     ssd_net.loc.apply(weights_init)
     ssd_net.conf.apply(weights_init)
 
-optimizer = optim.SGD(net.parameters(), lr=args.lr,
+
+from itertools import chain
+
+def get_param_groups(net):
+    assert isinstance(net, MobileSSD)
+    # *1
+
+    conf_weights, conf_biases = [], []
+    for name, p in net.conf.named_parameters():
+        if 'bias' in name:
+            conf_biases.append(p)
+        else:
+            conf_weights.append(p)
+
+    other_weights, other_biases = [], []
+    for name, p in chain(net.vgg.named_parameters(),net.extra.named_parameters(),net.loc.named_parameters()):
+        if 'bias' in name:
+            other_biases.append(p)
+        else:
+            other_weights.append(p)
+
+    param_groups = [conf_weights, conf_biases, other_weights, other_biases]
+    lr_mults = [1, 2, 0.1, 0.2]
+    decay_mults = [1, 0, 1, 0] # or [2] = 0.1?
+    param_groups = [
+        {
+            'params': ps,
+            'lr_mult': lr_mult,
+            'lr': args.lr*lr_mult,
+            'weight_decay': args.weight_decay*decay_mult
+        }
+           for ps, lr_mult, decay_mult in zip(param_groups, lr_mults, decay_mults)
+    ]
+    return param_groups
+
+
+optimizer = optim.SGD(get_param_groups(net), lr=args.lr,
                       momentum=args.momentum, weight_decay=args.weight_decay)
 criterion = MultiBoxLoss(num_classes, 0.5, True, 0, True, 3, 0.5, False, args.cuda)
 
@@ -229,7 +265,7 @@ def adjust_learning_rate(optimizer, gamma, step):
     """
     lr = args.lr * (gamma ** (step))
     for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+        param_group['lr'] = lr * param_group['lr_mult']
 
 
 if __name__ == '__main__':
