@@ -38,7 +38,6 @@ class MobileSSD(nn.Module):
         # Layer learns to scale the l2 normalized features from conv4_3
         # self.L2Norm = L2Norm(512, 20)
         self.extras = nn.ModuleList(extras)
-
         self.loc = nn.ModuleList(head[0])
         self.conf = nn.ModuleList(head[1])
 
@@ -74,8 +73,8 @@ class MobileSSD(nn.Module):
 
         # apply extra layers and cache source layer outputs
         for k, v in enumerate(self.extras):
-            x = F.relu(v(x), inplace=True)
-            if k % 2 == 1:
+            x = v(x)
+            if k % 6 == 5:
                 sources.append(x)
 
         # apply multibox head to source layers
@@ -168,10 +167,13 @@ def add_extras(cfg, i, batch_norm=False):
     for k, v in enumerate(cfg):
         if in_channels != 'S':
             if v == 'S':
-                layers += [nn.Conv2d(in_channels, cfg[k + 1],
-                           kernel_size=(1, 3)[flag], stride=2, padding=1)]
+                layers += [nn.Conv2d(in_channels, cfg[k + 1], kernel_size=(1, 3)[flag], stride=2, padding=1),
+                           nn.BatchNorm2d(cfg[k + 1]),
+                           nn.ReLU(inplace=True)]
             else:
-                layers += [nn.Conv2d(in_channels, v, kernel_size=(1, 3)[flag])]
+                layers += [nn.Conv2d(in_channels, v, kernel_size=(1, 3)[flag]),
+                           nn.BatchNorm2d(v),
+                           nn.ReLU(inplace=True)]
             flag = not flag
         in_channels = v
     return layers
@@ -192,11 +194,13 @@ def multibox(vgg, extra_layers, cfg, num_classes):
         conf_layers += [nn.Conv2d(v,
                         cfg[k] * num_classes, kernel_size=3, padding=1)]
 
-    for k, v in enumerate(extra_layers[1::2], 2):
+    for k, v in enumerate(extra_layers[5::6], 2):
         loc_layers += [nn.Conv2d(v.out_channels, cfg[k]
                                  * 4, kernel_size=3, padding=1)]
         conf_layers += [nn.Conv2d(v.out_channels, cfg[k]
                                   * num_classes, kernel_size=3, padding=1)]
+    print('extra_layers:', extra_layers)
+    print('loc_layers:', loc_layers)
     return vgg, extra_layers, (loc_layers, conf_layers)
 
 
