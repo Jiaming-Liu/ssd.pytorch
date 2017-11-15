@@ -40,6 +40,28 @@ v2 = {
     'name' : 'v2',
 }
 
+mobilessd = {
+    'feature_maps' : [19, 10, 5, 3, 2, 1], #done
+
+    'min_dim' : 300, #TODO: make sure this is correct!
+
+    'steps' : [16, 32, 64, 100, 150, 300], #TODO: make sure this is correct!
+
+    'min_sizes' : [60, 105, 150, 195, 240, 285], # done
+
+    'max_sizes' : [105, 150, 195, 240, 285, 300], #TODO:  inx 0 is not sure.
+
+    # 'aspect_ratios' : [[2, 1/2], [2, 1/2, 3, 1/3], [2, 1/2, 3, 1/3],
+    #                    [2, 1/2, 3, 1/3], [2, 1/2], [2, 1/2]],
+    'aspect_ratios' : [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3]],
+
+    'variance' : [0.1, 0.2],
+
+    'clip' : True,
+
+    'name' : 'mobilessd',
+}
+
 # use average pooling layer as last layer before multibox layers
 v1 = {
     'feature_maps' : [38, 19, 10, 5, 3, 1],
