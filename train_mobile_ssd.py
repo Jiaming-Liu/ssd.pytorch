@@ -111,7 +111,8 @@ if not args.resume:
 from itertools import chain
 
 def get_param_groups(net):
-    assert isinstance(net, MobileSSD)
+    if not isinstance(net, MobileSSD):
+        net = net.module
     # *1
 
     conf_weights, conf_biases = [], []
@@ -122,7 +123,7 @@ def get_param_groups(net):
             conf_weights.append(p)
 
     other_weights, other_biases = [], []
-    for name, p in chain(net.vgg.named_parameters(),net.extra.named_parameters(),net.loc.named_parameters()):
+    for name, p in chain(net.vgg.named_parameters(),net.extras.named_parameters(),net.loc.named_parameters()):
         if 'bias' in name:
             other_biases.append(p)
         else:
