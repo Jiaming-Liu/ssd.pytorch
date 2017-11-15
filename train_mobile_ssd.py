@@ -144,7 +144,7 @@ def get_param_groups(net):
     return param_groups
 
 
-optimizer = optim.RMSProp(get_param_groups(net), lr=args.lr,
+optimizer = optim.RMSprop(get_param_groups(net), lr=args.lr,
                       weight_decay=args.weight_decay)
 criterion = MultiBoxLoss(num_classes, 0.5, True, 0, True, 3, 0.5, False, args.cuda)
 
