@@ -7,10 +7,10 @@ import torch.nn.init as init
 import argparse
 from torch.autograd import Variable
 import torch.utils.data as data
-from data import v2, v1, mobilessd, AnnotationTransform, VOCDetection, detection_collate, VOCroot, VOC_CLASSES
+from data import mobilessd, AnnotationTransform, VOCDetection, detection_collate, VOCroot, VOC_CLASSES
 from utils.augmentations import SSDAugmentation
 from layers.modules import MultiBoxLoss
-from ssd import build_ssd
+from mobile_ssd import build_ssd
 import numpy as np
 import time
 
@@ -77,10 +77,11 @@ if args.resume:
     print('Resuming training, loading {}...'.format(args.resume))
     ssd_net.load_weights(args.resume)
 else:
+    #TODO: make this beautiful
     vgg_weights = torch.load(args.save_folder + args.basenet)['state_dict']
     vgg_weights['module.model.0.0.weight'] = \
         vgg_weights['module.model.0.0.weight'].index_select(1, torch.cuda.LongTensor([2, 1, 0]))
-    #TODO: flip conv0
+    vgg_weights = { k[7:]:v for k,v in vgg_weights.items() }
     print('Loading base network...')
     ssd_net.vgg.load_state_dict(vgg_weights)
 

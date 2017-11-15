@@ -59,7 +59,7 @@ mobilessd = {
 
     'clip' : True,
 
-    'name' : 'mobilessd',
+    'name' : 'v2',
 }
 
 # use average pooling layer as last layer before multibox layers

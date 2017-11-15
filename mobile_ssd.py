@@ -5,7 +5,7 @@ from torch.autograd import Variable
 from layers import *
 from data import mobilessd
 import os
-
+from pyinn.modules import Conv2dDepthwise
 
 class MobileSSD(nn.Module):
     """Single Shot Multibox Architecture
@@ -121,7 +121,8 @@ class MobileNet(nn.Module):
 
         def conv_dw(inp, oup, stride):
             return nn.Sequential(
-                nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                # nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                Conv2dDepthwise(channels=inp, kernel_size=3, stride=stride, padding=1, bias=False),
                 nn.BatchNorm2d(inp),
                 nn.ReLU(inplace=True),
 
@@ -147,7 +148,9 @@ class MobileNet(nn.Module):
             conv_dw(1024, 1024, 1), #conv13
         )
         self.fc = nn.Linear(1024, 1000)
-        self.norm_vector = torch.Tensor([[57.375, 57.12, 58.395]])
+        self.norm_vector = torch.autograd.Variable(
+            torch.Tensor([[[[57.375]], [[57.12]], [[58.395]]]]),
+            requires_grad=False)
 
     def forward(self, x):
         x = x / self.norm_vector
