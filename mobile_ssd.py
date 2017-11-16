@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 from layers import *
-from data import mobilessd
+from data.config import mobilessd
 import os
 from pyinn.modules import Conv2dDepthwise
 
