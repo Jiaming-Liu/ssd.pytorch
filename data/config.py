@@ -41,7 +41,7 @@ v2 = {
 }
 
 mobilessd = {
-    'feature_maps' : [19, 10, 5, 3, 2, 1], #done
+    'feature_maps' : [19, 10, 5, 3, 1], #done
 
     'min_dim' : 300, #TODO: make sure this is correct!
 
