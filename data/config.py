@@ -45,15 +45,15 @@ mobilessd = {
 
     'min_dim' : 300, #TODO: make sure this is correct!
 
-    'steps' : [16, 32, 64, 100, 150, 300], #TODO: make sure this is correct!
+    'steps' : [32, 64, 100, 150, 300], #TODO: make sure this is correct!
 
-    'min_sizes' : [60, 105, 150, 195, 240, 285], # done
+    'min_sizes' : [60, 111, 162, 213, 264],
 
-    'max_sizes' : [-1, 150, 195, 240, 285, 300], #TODO:  inx 0 is not sure.
+    'max_sizes' : [111, 162, 213, 264, 315],
 
     # 'aspect_ratios' : [[2, 1/2], [2, 1/2, 3, 1/3], [2, 1/2, 3, 1/3],
     #                    [2, 1/2, 3, 1/3], [2, 1/2], [2, 1/2]],
-    'aspect_ratios' : [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3]],
+    'aspect_ratios' : [[2, 3], [2, 3], [2, 3], [2], [2]],
 
     'variance' : [0.1, 0.2],
 

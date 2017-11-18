@@ -210,11 +210,11 @@ base = {
     '512': [],
 }
 extras = {
-    '300': [256, 'S', 512, 128, 'S', 256, 128, 'S', 256, 64, 'S', 128],
+    # SSD: '300': [256, 'S', 512, 128, 'S', 256, 128, 256, 128, 256],
     '512': [],
 }
 mbox = {
-    '300': [3, 6, 6, 6, 6, 6],  # number of boxes per feature map location
+    '300': [6, 6, 6, 4, 4],  # number of boxes per feature map location
     '512': [],
 }
 
