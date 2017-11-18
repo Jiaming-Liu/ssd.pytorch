@@ -45,7 +45,8 @@ mobilessd = {
 
     'min_dim' : 300, #TODO: make sure this is correct!
 
-    'steps' : [16, 32, 64, 100, 150, 300], #TODO: make sure this is correct!
+#    'steps': [16, 32, 64, 100, 150, 300],  # TODO: make sure this is correct!
+    'steps': [300.0/i for i in [19, 10, 5, 3, 2, 1] ],
 
     'min_sizes' : [60, 105, 150, 195, 240, 285], # done
 
