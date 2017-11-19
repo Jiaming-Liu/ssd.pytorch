@@ -155,7 +155,7 @@ class MobileNet(nn.Module):
         x = x / self.norm_vector
         for i, module in enumerate(self.model._modules.values()):
             x = module(x)
-            if i==11: out=x
+            if i==11 or i==5: out=x
         return out, x
 
 
@@ -188,7 +188,7 @@ def multibox(vgg, extra_layers, cfg, num_classes):
     #                              cfg[k] * 4, kernel_size=3, padding=1)]
     #     conf_layers += [nn.Conv2d(vgg[v].out_channels,
     #                     cfg[k] * num_classes, kernel_size=3, padding=1)]
-    for k, v in enumerate([512, 1024]): # num of output channels of conv11, conv13
+    for k, v in enumerate([256, 512, 1024]): # num of output channels of conv5, conv11, conv13
         loc_layers += [nn.Conv2d(v,
                                  cfg[k] * 4, kernel_size=3, padding=1)]
         conf_layers += [nn.Conv2d(v,
@@ -215,7 +215,7 @@ extras = {
     '512': [],
 }
 mbox = {
-    '300': [6, 6, 6, 4, 4],  # number of boxes per feature map location
+    '300': [4, 6, 6, 6, 4, 4],  # number of boxes per feature map location
     '512': [],
 }
 
