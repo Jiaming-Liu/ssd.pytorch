@@ -41,6 +41,7 @@ parser.add_argument('--send_images_to_visdom', type=str2bool, default=False,
                     help='Sample a random image from each 10th batch, send it to visdom after augmentations step')
 parser.add_argument('--save_folder', default='weights/', help='Location to save checkpoint models')
 parser.add_argument('--voc_root', default=VOCroot, help='Location of VOC root directory')
+parser.add_argument('--postfix', default='kd_rate_10', help='Location of VOC root directory')
 args = parser.parse_args()
 
 if args.cuda and torch.cuda.is_available():
@@ -265,8 +266,8 @@ def train():
         if iteration % 5000 == 0:
             print('Saving state, iter:', iteration)
             torch.save(ssd_net.state_dict(), 'weights/ssd300_0712_' +
-                       repr(iteration) + '.pth')
-    torch.save(ssd_net.state_dict(), args.save_folder + '' + args.version + '.pth')
+                       repr(iteration) + args.postfix + '.pth')
+    torch.save(ssd_net.state_dict(), args.save_folder + '' + args.version + args.postfix + '.pth')
 
 
 def adjust_learning_rate(optimizer, gamma, step):
