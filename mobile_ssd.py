@@ -155,8 +155,9 @@ class MobileNet(nn.Module):
         x = x / self.norm_vector
         for i, module in enumerate(self.model._modules.values()):
             x = module(x)
-            if i==11 or i==5: out=x
-        return out, x
+            if i==5: out5=x
+            if i==11: out11=x
+        return out5, out11, x
 
 
 def add_extras(cfg, i, batch_norm=False):

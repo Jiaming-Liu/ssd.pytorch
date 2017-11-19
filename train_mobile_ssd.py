@@ -45,7 +45,7 @@ if args.cuda and torch.cuda.is_available():
 else:
     torch.set_default_tensor_type('torch.FloatTensor')
 
-cfg = mobile_ssd
+cfg = mobilessd
 
 if not os.path.exists(args.save_folder):
     os.mkdir(args.save_folder)
