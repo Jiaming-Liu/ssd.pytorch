@@ -14,7 +14,6 @@ from mobile_ssd import build_ssd, MobileSSD
 from ssd_teacher import build_teacher
 import numpy as np
 import time
-import threading
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
@@ -227,17 +226,11 @@ def train():
             targets = [Variable(anno, volatile=True) for anno in targets]
         # forward
         t0 = time.time()
-        teacher_sources = []
-        def _teacher_worker(images, teacher_sources):
-            teacher_sources.extend(teacher(torch.autograd.Variable(images.data,volatile=True)))
-        thread = threading.Thread(target=_teacher_worker,
-                                    args=(images, teacher_sources))
-        thread.start()
+        teacher_sources = teacher(torch.autograd.Variable(images.data,volatile=True))
         sources, out = net(images)
         # backprop
         optimizer.zero_grad()
         loss_l, loss_c = criterion(out, targets)
-        thread.join()
         loss_kd = torch.nn.functional.mse_loss(sources[-1],
                                                torch.autograd.Variable(teacher_sources[-1].data, requires_grad=False))
         loss = loss_l + loss_c + loss_kd*args.kd_rate
