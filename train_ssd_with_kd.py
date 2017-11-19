@@ -21,8 +21,8 @@ def str2bool(v):
 parser = argparse.ArgumentParser(description='Single Shot MultiBox Detector Training')
 parser.add_argument('--version', default='v2', help='conv11_2(v2) or pool6(v1) as last layer')
 parser.add_argument('--basenet', default='mobilenet.pth', help='pretrained base model')
-parser.add_argument('--kdrate', default=10, type=float, help='pretrained base model')
-parser.add_argument('--teacher', default='ssd-lr0.1-map65.62.pth', help='pretrained base model')
+parser.add_argument('--kd-rate', default=10, type=float, help='pretrained base model')
+parser.add_argument('--teacher', default='weights/ssd_300_v2_map_0.7749.pth', help='pretrained base model')
 parser.add_argument('--jaccard_threshold', default=0.5, type=float, help='Min Jaccard index for matching')
 parser.add_argument('--batch_size', default=32, type=int, help='Batch size for training')
 parser.add_argument('--resume', default=None, type=str, help='Resume from checkpoint')
@@ -73,14 +73,12 @@ if args.visdom:
 
 ssd_net = build_ssd('train', 300, num_classes)
 net = ssd_net
-teacher = build_teacher('train', 300, num_classes)
-
+teacher = build_teacher('test', 300, num_classes)
+teacher.load_state_dict(torch.load(args.teacher))
 if args.cuda:
     net = torch.nn.DataParallel(ssd_net)
     teacher = torch.nn.DataParallel(teacher)
     cudnn.benchmark = True
-
-teacher.load_weights(torch.load(args.teacher))
 
 if args.resume:
     print('Resuming training, loading {}...'.format(args.resume))
@@ -97,7 +95,6 @@ else:
 if args.cuda:
     net = net.cuda()
     teacher = teacher.cuda()
-
 
 def xavier(param):
     # init.xavier_uniform(param)
@@ -229,13 +226,13 @@ def train():
             targets = [Variable(anno, volatile=True) for anno in targets]
         # forward
         t0 = time.time()
-        teacher_sources = teacher(torch.autograd.Varible(images,volatile=True))
+        teacher_sources = teacher(torch.autograd.Variable(images.data,volatile=True))
         sources, out = net(images)
         # backprop
         optimizer.zero_grad()
         loss_l, loss_c = criterion(out, targets)
         loss_kd = torch.nn.functional.mse_loss(sources[-1],
-                                               torch.autograd.Varible(teacher_sources[-1].data, requires_grad=False))
+                                               torch.autograd.Variable(teacher_sources[-1].data, requires_grad=False))
         loss = loss_l + loss_c + loss_kd*args.kd_rate
         loss.backward()
         optimizer.step()
