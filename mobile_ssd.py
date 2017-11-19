@@ -40,6 +40,9 @@ class MobileSSD(nn.Module):
         self.extras = nn.ModuleList(extras)
         self.loc = nn.ModuleList(head[0])
         self.conf = nn.ModuleList(head[1])
+        self.mapping = nn.Sequential(
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1),
+            nn.ReLU(inplace=True))
 
         if phase == 'test':
             self.softmax = nn.Softmax()
@@ -96,7 +99,7 @@ class MobileSSD(nn.Module):
                 conf.view(conf.size(0), -1, self.num_classes),
                 self.priors
             )
-        return sources, output
+        return [self.mapping(sources[-1])], output
 
     def load_weights(self, base_file):
         other, ext = os.path.splitext(base_file)
