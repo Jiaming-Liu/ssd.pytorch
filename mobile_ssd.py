@@ -96,7 +96,7 @@ class MobileSSD(nn.Module):
                 conf.view(conf.size(0), -1, self.num_classes),
                 self.priors
             )
-        return output
+        return sources, output
 
     def load_weights(self, base_file):
         other, ext = os.path.splitext(base_file)
